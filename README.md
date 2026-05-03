@@ -136,5 +136,9 @@ streamlit run dashboard/app.py
 
 ---
 
+**Live dashboard:** [aeo-visibility-diff.streamlit.app](https://aeo-visibility-diff.streamlit.app)
+
+---
+
 _Built by Devante Heywood as a Petra Labs application demo._  
 _All data from real API calls. No synthetic responses._

@@ -198,8 +198,9 @@ def mention_rate_bar(df: pd.DataFrame, company: str) -> go.Figure:
         text=[f"{r:.0f}%" for r in prov_df["mention_rate"]],
         textposition="outside",
         textfont=dict(color="#aaa", size=13),
+        showlegend=False,
     ))
-    fig.update_layout(**PLOTLY_LAYOUT, title=dict(text="Mention Rate by Provider", font=dict(color="#aaa", size=13)))
+    fig.update_layout(**PLOTLY_LAYOUT, showlegend=False, title=dict(text="Mention Rate by Provider", font=dict(color="#aaa", size=13)))
     fig.update_yaxes(range=[0, 110], ticksuffix="%")
     return fig
 
@@ -214,16 +215,17 @@ def category_breakdown_bar(df: pd.DataFrame, company: str) -> go.Figure:
             rows.append({"category": label, "provider": prov.capitalize(), "rate": rate})
 
     cat_df = pd.DataFrame(rows)
+    cat_df["label"] = cat_df["rate"].apply(lambda r: f"{r:.0f}%")
     fig = px.bar(
         cat_df,
         x="category",
         y="rate",
         color="provider",
         barmode="group",
+        text="label",
         color_discrete_map={p.capitalize(): c for p, c in PROVIDER_COLORS.items()},
-        text_auto=".0f",
     )
-    fig.update_traces(texttemplate="%{text}%", textposition="outside", textfont_color="#aaa")
+    fig.update_traces(textposition="outside", textfont_color="#aaa")
     fig.update_layout(**PLOTLY_LAYOUT, title=dict(text="Mention Rate by Prompt Category", font=dict(color="#aaa", size=13)))
     fig.update_yaxes(range=[0, 115], ticksuffix="%", title="")
     fig.update_xaxes(title="")
