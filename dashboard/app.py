@@ -111,8 +111,8 @@ PLOTLY_LAYOUT = dict(
     xaxis=dict(gridcolor="#1a1a1a", zerolinecolor="#1a1a1a", color="#666"),
     yaxis=dict(gridcolor="#1a1a1a", zerolinecolor="#1a1a1a", color="#666"),
 )
-# Pie/donut charts don't accept xaxis/yaxis keys
-PLOTLY_LAYOUT_PIE = {k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("xaxis", "yaxis")}
+# Pie/donut charts don't accept xaxis/yaxis/showlegend as layout keys
+PLOTLY_LAYOUT_PIE = {k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("xaxis", "yaxis", "showlegend")}
 
 PROVIDER_COLORS = {
     "anthropic": "#d97706",
@@ -156,9 +156,17 @@ def load_data() -> pd.DataFrame:
 def _parse_list(x) -> list:
     if isinstance(x, list):
         return x
+    if x is None:
+        return []
+    try:
+        import math
+        if math.isnan(float(x)):
+            return []
+    except (TypeError, ValueError):
+        pass
     if isinstance(x, str):
         x = x.strip()
-        if not x or x in ("nan", "[]"):
+        if not x or x in ("nan", "[]", "None"):
             return []
         try:
             result = ast.literal_eval(x)
