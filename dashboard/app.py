@@ -101,18 +101,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Plotly theme ──────────────────────────────────────────────────────────────
-PLOTLY_LAYOUT = dict(
+_BASE_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font=dict(family="Inter, sans-serif", color="#888", size=12),
     margin=dict(l=0, r=0, t=32, b=0),
-    showlegend=True,
     legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#888")),
+)
+PLOTLY_LAYOUT = dict(
+    **_BASE_LAYOUT,
     xaxis=dict(gridcolor="#1a1a1a", zerolinecolor="#1a1a1a", color="#666"),
     yaxis=dict(gridcolor="#1a1a1a", zerolinecolor="#1a1a1a", color="#666"),
 )
-# Pie/donut charts don't accept xaxis/yaxis/showlegend as layout keys
-PLOTLY_LAYOUT_PIE = {k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("xaxis", "yaxis", "showlegend")}
+PLOTLY_LAYOUT_PIE = dict(**_BASE_LAYOUT)
 
 PROVIDER_COLORS = {
     "anthropic": "#d97706",
