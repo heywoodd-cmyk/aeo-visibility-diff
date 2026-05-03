@@ -1,0 +1,65 @@
+# AEO Visibility Diff — Run Configuration
+
+run:
+  trials_per_combination: 5
+  max_concurrent_per_provider: 3
+  output_format: csv  # csv or parquet
+
+rate_limits:
+  anthropic:
+    concurrency: 3
+    delay_between_calls: 0.0
+  openai:
+    concurrency: 3
+    delay_between_calls: 0.0
+  gemini:
+    concurrency: 1
+    delay_between_calls: 13.0  # 5 req/min free tier = 12s between calls + buffer
+
+models:
+  anthropic: claude-haiku-4-5-20251001
+  openai: gpt-4o-mini
+  gemini: gemini-2.5-flash
+
+providers:
+  - anthropic
+  - openai
+  - gemini
+
+targets:
+  - ramp
+  - linear
+  - rippling
+
+scoring:
+  model: claude-haiku-4-5-20251001
+  provider: anthropic
+
+competitor_sets:
+  ramp:
+    - Ramp
+    - Brex
+    - Mercury
+    - Bill.com
+    - Divvy
+    - Concur
+    - Amex
+    - Expensify
+  linear:
+    - Linear
+    - Jira
+    - Asana
+    - ClickUp
+    - Notion
+    - GitHub Issues
+    - Shortcut
+    - Trello
+  rippling:
+    - Rippling
+    - Gusto
+    - Deel
+    - Justworks
+    - Workday
+    - BambooHR
+    - ADP
+    - Lattice
