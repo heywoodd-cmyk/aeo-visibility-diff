@@ -111,6 +111,8 @@ PLOTLY_LAYOUT = dict(
     xaxis=dict(gridcolor="#1a1a1a", zerolinecolor="#1a1a1a", color="#666"),
     yaxis=dict(gridcolor="#1a1a1a", zerolinecolor="#1a1a1a", color="#666"),
 )
+# Pie/donut charts don't accept xaxis/yaxis keys
+PLOTLY_LAYOUT_PIE = {k: v for k, v in PLOTLY_LAYOUT.items() if k not in ("xaxis", "yaxis")}
 
 PROVIDER_COLORS = {
     "anthropic": "#d97706",
@@ -309,7 +311,7 @@ def sentiment_donut(df: pd.DataFrame, company: str) -> go.Figure:
         textinfo="percent+label",
         textfont=dict(color="#aaa", size=11),
     ))
-    fig.update_layout(**PLOTLY_LAYOUT, title=dict(text="Sentiment Distribution", font=dict(color="#aaa", size=13)), showlegend=False)
+    fig.update_layout(**PLOTLY_LAYOUT_PIE, title=dict(text="Sentiment Distribution", font=dict(color="#aaa", size=13)), showlegend=False)
     return fig
 
 
