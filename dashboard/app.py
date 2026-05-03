@@ -5,8 +5,8 @@ Operator-grade view of brand mention rates, competitor co-mention patterns,
 and KPC framing across AI search platforms.
 """
 
+import ast
 import json
-import sys
 from collections import Counter
 from pathlib import Path
 
@@ -15,8 +15,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-# Make src importable when running from project root
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Inlined from src/prompts.py — keeps the dashboard dependency-free
+COMPANY_CONFIGS = {
+    "ramp": {"name": "Ramp"},
+    "linear": {"name": "Linear"},
+    "rippling": {"name": "Rippling"},
+}
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -143,23 +147,27 @@ def load_data() -> pd.DataFrame:
 
     for col in ["score_mentions", "score_kpcs"]:
         if col in df.columns:
-            df[col] = df[col].apply(
-                lambda x: json.loads(x) if isinstance(x, str) and x.startswith("[") else []
-            )
+            df[col] = df[col].apply(_parse_list)
     return df
 
 
+def _parse_list(x) -> list:
+    if isinstance(x, list):
+        return x
+    if isinstance(x, str):
+        x = x.strip()
+        if not x or x in ("nan", "[]"):
+            return []
+        try:
+            result = ast.literal_eval(x)
+            return result if isinstance(result, list) else []
+        except Exception:
+            return []
+    return []
+
+
 def parse_list_col(series: pd.Series) -> pd.Series:
-    def _parse(x):
-        if isinstance(x, list):
-            return x
-        if isinstance(x, str):
-            try:
-                return json.loads(x)
-            except Exception:
-                return []
-        return []
-    return series.apply(_parse)
+    return series.apply(_parse_list)
 
 
 # ── Chart builders ────────────────────────────────────────────────────────────
@@ -213,7 +221,6 @@ def category_breakdown_bar(df: pd.DataFrame, company: str) -> go.Figure:
 
 
 def co_mention_heatmap(df: pd.DataFrame, company: str) -> go.Figure:
-    from src.prompts import COMPANY_CONFIGS
     subset = df[(df["company"] == company) & (df["score_target_mentioned"] == True)]
     target_name = COMPANY_CONFIGS[company]["name"].lower()
 
@@ -258,7 +265,6 @@ def co_mention_heatmap(df: pd.DataFrame, company: str) -> go.Figure:
 
 
 def kpc_bar(df: pd.DataFrame, company: str) -> go.Figure:
-    from src.prompts import COMPANY_CONFIGS
     subset = df[(df["company"] == company) & (df["score_target_mentioned"] == True)]
     counter: Counter = Counter()
     for _, row in subset.iterrows():
@@ -400,7 +406,6 @@ def main():
 
         st.markdown("### Who shows up when the target does")
         subset = filtered[filtered["score_target_mentioned"] == True]
-        from src.prompts import COMPANY_CONFIGS
         target_name = COMPANY_CONFIGS[company]["name"].lower()
         counter: Counter = Counter()
         for _, row in subset.iterrows():
